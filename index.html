@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#f5f7fb" />
+  <meta name="theme-color" content="#f4f7fb" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Affitto" />
@@ -23,28 +23,71 @@
       <button class="icon-button" id="settingsBtn" aria-label="Impostazioni">⚙️</button>
     </header>
 
-    <section class="summary-card">
-      <div>
-        <span class="summary-label">Anno</span>
+    <section class="today-card" id="todayCard">
+      <div class="today-head">
+        <div>
+          <div class="eyebrow">Situazione ad oggi</div>
+          <div class="today-date" id="todayLabel"></div>
+        </div>
+        <span class="health-badge" id="healthBadge">—</span>
+      </div>
+      <div class="today-hero">
+        <span>Totale ancora da pagare</span>
+        <strong id="outstandingTotal">€ 0,00</strong>
+      </div>
+      <div class="dashboard-grid">
+        <div class="dashboard-stat">
+          <span>Mensilità aperte</span>
+          <strong id="openMonthsCount">0</strong>
+        </div>
+        <div class="dashboard-stat">
+          <span>Pagate in ritardo</span>
+          <strong id="lateMonthsCount">0</strong>
+        </div>
+        <div class="dashboard-stat">
+          <span>Dilazionate</span>
+          <strong id="splitMonthsCount">0</strong>
+        </div>
+        <div class="dashboard-stat">
+          <span>Cauzione residua</span>
+          <strong id="depositRemaining">€ 0,00</strong>
+        </div>
+      </div>
+      <div id="alertsList" class="alerts-list"></div>
+    </section>
+
+    <section class="year-section">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">Archivio per anno</div>
+          <h2>Mensilità</h2>
+        </div>
         <div class="year-control">
           <button id="prevYear" class="mini-button" aria-label="Anno precedente">‹</button>
-          <strong id="yearLabel"></strong>
+          <select id="yearSelect" aria-label="Seleziona anno"></select>
           <button id="nextYear" class="mini-button" aria-label="Anno successivo">›</button>
         </div>
       </div>
-      <div class="summary-stat">
-        <span class="summary-label">Incassato</span>
-        <strong id="yearTotal">€ 0,00</strong>
-      </div>
-      <div class="summary-stat">
-        <span class="summary-label">Mensilità</span>
-        <strong id="paidCount">0/12</strong>
-      </div>
+
+      <section class="summary-card">
+        <div class="summary-stat">
+          <span class="summary-label">Incassato in contanti</span>
+          <strong id="yearCashTotal">€ 0,00</strong>
+        </div>
+        <div class="summary-stat">
+          <span class="summary-label">Imputato da cauzione</span>
+          <strong id="yearDepositUsed">€ 0,00</strong>
+        </div>
+        <div class="summary-stat">
+          <span class="summary-label">Mensilità saldate</span>
+          <strong id="paidCount">0/12</strong>
+        </div>
+      </section>
     </section>
 
     <section class="months" id="monthsList"></section>
 
-    <button class="primary-button sticky-add" id="newPaymentBtn">＋ Registra pagamento</button>
+    <button class="primary-button sticky-add" id="newPaymentBtn">＋ Registra un versamento</button>
 
     <section class="tools-card">
       <button class="secondary-button" id="exportBtn">Esporta backup</button>
@@ -75,9 +118,38 @@
       <label>Indirizzo immobile
         <textarea id="propertyAddress" rows="2" required></textarea>
       </label>
-      <label>Canone mensile (€)
-        <input id="monthlyRent" type="number" min="0" step="0.01" inputmode="decimal" required />
-      </label>
+
+      <div class="form-grid">
+        <label>Canone mensile (€)
+          <input id="monthlyRent" type="number" min="0" step="0.01" inputmode="decimal" required />
+        </label>
+        <label>Giorno di scadenza
+          <input id="dueDay" type="number" min="1" max="28" inputmode="numeric" required />
+        </label>
+      </div>
+
+      <div class="form-grid">
+        <label>Inizio contratto
+          <input id="contractStartDate" type="date" required />
+        </label>
+        <label>Fine contratto (facoltativa)
+          <input id="contractEndDate" type="date" />
+        </label>
+      </div>
+
+      <div class="settings-group">
+        <div class="group-title">Cauzione / caparra</div>
+        <div class="form-grid">
+          <label>Importo iniziale (€)
+            <input id="depositAmount" type="number" min="0" step="0.01" inputmode="decimal" />
+          </label>
+          <label>Data versamento
+            <input id="depositDate" type="date" />
+          </label>
+        </div>
+        <small class="field-help">Se una parte della cauzione viene usata per anticipare o coprire il canone, potrai indicarla in ogni singolo versamento.</small>
+      </div>
+
       <label>Luogo di emissione ricevuta
         <input id="receiptPlace" placeholder="es. Napoli" />
       </label>
@@ -90,14 +162,14 @@
       <div class="sheet-handle"></div>
       <div class="sheet-header">
         <div>
-          <div class="eyebrow">Nuova mensilità</div>
-          <h2>Registra pagamento</h2>
+          <div class="eyebrow">Nuovo versamento</div>
+          <h2 id="paymentDialogTitle">Registra pagamento</h2>
         </div>
         <button type="button" class="icon-button" id="closePaymentBtn" aria-label="Chiudi">✕</button>
       </div>
 
       <div class="form-grid">
-        <label>Mese
+        <label>Mese di riferimento
           <select id="paymentMonth" required></select>
         </label>
         <label>Anno
@@ -105,23 +177,30 @@
         </label>
       </div>
 
+      <div id="monthBalanceBox" class="balance-box"></div>
+
       <div class="form-grid">
-        <label>Importo (€)
-          <input id="paymentAmount" type="number" min="0" step="0.01" inputmode="decimal" required />
+        <label>Versamento in contanti (€)
+          <input id="paymentCashAmount" type="number" min="0" step="0.01" inputmode="decimal" value="0" required />
         </label>
-        <label>Data pagamento
+        <label>Data del versamento
           <input id="paymentDate" type="date" required />
         </label>
       </div>
 
-      <label>Metodo
-        <select id="paymentMethod">
-          <option value="Contanti">Contanti</option>
-        </select>
+      <label class="check-row toggle-row">
+        <input type="checkbox" id="useDeposit" />
+        <span>Usa una parte della cauzione/caparra per coprire questa mensilità</span>
       </label>
+      <div id="depositUseWrap" class="hidden">
+        <label>Importo imputato dalla cauzione (€)
+          <input id="paymentDepositAmount" type="number" min="0" step="0.01" inputmode="decimal" value="0" />
+        </label>
+        <div class="field-help" id="depositAvailableHint"></div>
+      </div>
 
       <label>Note (facoltative)
-        <textarea id="paymentNotes" rows="2" placeholder="es. saldo completo della mensilità"></textarea>
+        <textarea id="paymentNotes" rows="2" placeholder="es. primo acconto; saldo mensilità; accordo per pagamento dilazionato"></textarea>
       </label>
 
       <div class="signature-block">
@@ -144,11 +223,27 @@
 
       <label class="check-row">
         <input type="checkbox" id="confirmCash" required />
-        <span>Confermo che il pagamento in contanti è stato ricevuto.</span>
+        <span>Confermo che il versamento indicato è stato ricevuto e/o che l'eventuale quota di cauzione è stata imputata al canone.</span>
       </label>
 
       <button type="submit" class="primary-button">Registra e crea ricevuta</button>
     </form>
+  </dialog>
+
+  <dialog id="monthDialog" class="sheet-dialog">
+    <section class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div>
+          <div class="eyebrow">Dettaglio mensilità</div>
+          <h2 id="monthDialogTitle"></h2>
+        </div>
+        <button class="icon-button" id="closeMonthBtn" aria-label="Chiudi">✕</button>
+      </div>
+      <div id="monthDetailSummary" class="month-detail-summary"></div>
+      <div id="monthTransactions" class="transaction-list"></div>
+      <button class="primary-button" id="addInstallmentBtn">＋ Aggiungi versamento</button>
+    </section>
   </dialog>
 
   <dialog id="receiptDialog" class="sheet-dialog">
@@ -164,7 +259,7 @@
       <div id="receiptSummary" class="receipt-summary"></div>
       <button class="primary-button" id="shareReceiptBtn">Condividi / salva PDF</button>
       <button class="secondary-button" id="downloadReceiptBtn">Scarica PDF</button>
-      <button class="danger-button hidden" id="deletePaymentBtn">Elimina pagamento</button>
+      <button class="danger-button" id="deletePaymentBtn">Elimina versamento</button>
       <p class="help-text">Su iPhone/Android usa “Condividi / salva PDF” e scegli OneDrive o Dropbox dal menu di sistema.</p>
     </section>
   </dialog>

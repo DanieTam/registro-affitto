@@ -1,50 +1,61 @@
-# Registro Affitto – PWA
+# Registro Affitto – PWA v2
 
-Piccola app web installabile per registrare mensilmente i pagamenti dell'affitto in contanti, acquisire due firme con il dito e generare una ricevuta PDF.
+App web installabile per gestire pagamenti dell'affitto, anche parziali o dilazionati, firme e ricevute PDF.
 
-## Funzioni
+## Novità della versione 2
 
-- 12 mensilità per anno con stato pagato/non registrato
-- dati di locatore, conduttore, immobile e canone
-- importo e data del pagamento
-- firma del conduttore e del locatore su touchscreen
-- ricevuta PDF numerata `AAAA/MM`
-- condivisione del PDF tramite il menu di sistema del telefono
-- salvataggio in OneDrive o Dropbox scegliendo l'app dal menu Condividi
-- archivio locale sul dispositivo
-- backup/esportazione JSON e ripristino
-- utilizzo offline dopo la prima apertura
-- nessun account e nessun abbonamento
+- più versamenti per la stessa mensilità
+- residuo mensile calcolato automaticamente
+- stato mensilità: saldata, parziale, scaduta, non ancora dovuta, fuori contratto
+- dashboard alla data corrente con totale da pagare e mensilità aperte
+- evidenza delle mensilità saldate in ritardo
+- evidenza dei pagamenti dilazionati in più versamenti
+- gestione della cauzione/caparra iniziale
+- possibilità di imputare una quota della cauzione a una mensilità
+- calcolo automatico della cauzione residua
+- organizzazione e riepilogo per anno
+- numero ricevuta progressivo annuale (es. 2026-0001)
+- PDF ridisegnato in formato professionale
+- compatibilità automatica con i dati della versione precedente
 
-## Installazione su smartphone
+## Dati del contratto
 
-Una PWA deve essere aperta da un indirizzo HTTPS per poter essere installata correttamente e per usare al meglio la condivisione dei file.
+Per calcolare correttamente ritardi e arretrati, nelle Impostazioni indica:
 
-1. Pubblica il contenuto di questa cartella su un hosting statico HTTPS (per esempio GitHub Pages, Cloudflare Pages, Netlify o un tuo server HTTPS).
-2. Apri l'indirizzo dal telefono.
-3. iPhone/iPad: Safari > Condividi > **Aggiungi alla schermata Home**.
-4. Android: Chrome > menu > **Installa app** / **Aggiungi a schermata Home**.
+- canone mensile
+- giorno di scadenza del canone
+- data di inizio contratto
+- eventuale data di fine contratto
+- eventuale cauzione iniziale e relativa data
 
-Dopo l'installazione, l'app continua a funzionare offline. I dati restano nel browser/PWA di quel dispositivo.
+## Pagamenti parziali
+
+Apri una mensilità e usa **Aggiungi versamento**. Ogni versamento conserva:
+
+- importo in contanti
+- eventuale quota di cauzione imputata al canone
+- data
+- note
+- firma del conduttore
+- firma del locatore
+- propria ricevuta PDF
+
+La mensilità viene segnata come saldata solo quando la somma dei versamenti raggiunge il canone mensile.
+
+## Installazione / aggiornamento con GitHub Pages
+
+Se l'app è già pubblicata su GitHub Pages, sostituisci nel repository i file della vecchia versione con quelli di questa cartella e fai commit. I dati già salvati sul telefono restano nello storage locale della PWA e vengono migrati automaticamente.
+
+Dopo l'aggiornamento, apri una volta il sito in Safari/Chrome con connessione internet. Se l'app installata mostra ancora la vecchia versione, chiudila completamente e riaprila. Il service worker v2 elimina la vecchia cache.
 
 ## Salvare una ricevuta in OneDrive o Dropbox
 
-Dopo la registrazione del pagamento premi **Condividi / salva PDF**. Nel menu di condivisione di iOS/Android scegli OneDrive o Dropbox. La prima volta può essere necessario abilitare l'app desiderata nelle opzioni del menu di condivisione.
+Dopo la registrazione del versamento premi **Condividi / salva PDF** e scegli OneDrive o Dropbox dal menu di condivisione di iOS/Android.
 
 ## Backup importante
 
-I dati sono locali al dispositivo. Usa periodicamente **Esporta backup** e conserva il file `.json` in OneDrive/Dropbox. Il backup contiene anche le firme registrate.
-
-## Test su computer
-
-Da questa cartella puoi avviare un server locale con:
-
-```bash
-python3 -m http.server 8000
-```
-
-Poi apri `http://localhost:8000` nel browser.
+I dati sono locali al dispositivo. Usa periodicamente **Esporta backup** e conserva il file `.json` in OneDrive/Dropbox. Il backup contiene anche le firme registrate e i dati della cauzione.
 
 ## Privacy
 
-L'app non invia dati a server esterni. Il PDF viene creato nel browser. La condivisione verso OneDrive/Dropbox avviene soltanto quando l'utente preme il relativo pulsante e sceglie la destinazione dal menu del sistema operativo.
+L'app non invia dati a server esterni. GitHub Pages ospita soltanto il codice dell'app. I dati del contratto, i pagamenti e le firme restano nel browser/PWA del dispositivo, salvo l'esportazione o la condivisione effettuata volontariamente dall'utente.
