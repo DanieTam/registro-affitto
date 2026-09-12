@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f5f7fb" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Affitto" />
+  <title>Registro Affitto</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">Registro pagamenti</div>
+        <h1 id="homeTitle">Affitto</h1>
+        <div class="subtitle" id="homeSubtitle">Configura immobile e contratto</div>
+      </div>
+      <button class="icon-button" id="settingsBtn" aria-label="Impostazioni">⚙️</button>
+    </header>
+
+    <section class="summary-card">
+      <div>
+        <span class="summary-label">Anno</span>
+        <div class="year-control">
+          <button id="prevYear" class="mini-button" aria-label="Anno precedente">‹</button>
+          <strong id="yearLabel"></strong>
+          <button id="nextYear" class="mini-button" aria-label="Anno successivo">›</button>
+        </div>
+      </div>
+      <div class="summary-stat">
+        <span class="summary-label">Incassato</span>
+        <strong id="yearTotal">€ 0,00</strong>
+      </div>
+      <div class="summary-stat">
+        <span class="summary-label">Mensilità</span>
+        <strong id="paidCount">0/12</strong>
+      </div>
+    </section>
+
+    <section class="months" id="monthsList"></section>
+
+    <button class="primary-button sticky-add" id="newPaymentBtn">＋ Registra pagamento</button>
+
+    <section class="tools-card">
+      <button class="secondary-button" id="exportBtn">Esporta backup</button>
+      <label class="secondary-button file-label">
+        Importa backup
+        <input type="file" id="importInput" accept="application/json" hidden />
+      </label>
+    </section>
+  </main>
+
+  <dialog id="settingsDialog" class="sheet-dialog">
+    <form method="dialog" id="settingsForm" class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div>
+          <div class="eyebrow">Configurazione</div>
+          <h2>Dati affitto</h2>
+        </div>
+        <button type="button" class="icon-button" id="closeSettingsBtn" aria-label="Chiudi">✕</button>
+      </div>
+
+      <label>Nome locatore
+        <input id="landlordName" autocomplete="name" required />
+      </label>
+      <label>Nome conduttore
+        <input id="tenantName" autocomplete="name" required />
+      </label>
+      <label>Indirizzo immobile
+        <textarea id="propertyAddress" rows="2" required></textarea>
+      </label>
+      <label>Canone mensile (€)
+        <input id="monthlyRent" type="number" min="0" step="0.01" inputmode="decimal" required />
+      </label>
+      <label>Luogo di emissione ricevuta
+        <input id="receiptPlace" placeholder="es. Napoli" />
+      </label>
+      <button type="submit" class="primary-button">Salva impostazioni</button>
+    </form>
+  </dialog>
+
+  <dialog id="paymentDialog" class="sheet-dialog">
+    <form method="dialog" id="paymentForm" class="sheet payment-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div>
+          <div class="eyebrow">Nuova mensilità</div>
+          <h2>Registra pagamento</h2>
+        </div>
+        <button type="button" class="icon-button" id="closePaymentBtn" aria-label="Chiudi">✕</button>
+      </div>
+
+      <div class="form-grid">
+        <label>Mese
+          <select id="paymentMonth" required></select>
+        </label>
+        <label>Anno
+          <input id="paymentYear" type="number" min="2000" max="2100" required />
+        </label>
+      </div>
+
+      <div class="form-grid">
+        <label>Importo (€)
+          <input id="paymentAmount" type="number" min="0" step="0.01" inputmode="decimal" required />
+        </label>
+        <label>Data pagamento
+          <input id="paymentDate" type="date" required />
+        </label>
+      </div>
+
+      <label>Metodo
+        <select id="paymentMethod">
+          <option value="Contanti">Contanti</option>
+        </select>
+      </label>
+
+      <label>Note (facoltative)
+        <textarea id="paymentNotes" rows="2" placeholder="es. saldo completo della mensilità"></textarea>
+      </label>
+
+      <div class="signature-block">
+        <div class="signature-title-row">
+          <strong>Firma conduttore</strong>
+          <button type="button" class="text-button" data-clear="tenantSignature">Cancella</button>
+        </div>
+        <canvas id="tenantSignature" class="signature-pad" width="900" height="270"></canvas>
+        <small>Firmare con il dito all'interno del riquadro.</small>
+      </div>
+
+      <div class="signature-block">
+        <div class="signature-title-row">
+          <strong>Firma locatore</strong>
+          <button type="button" class="text-button" data-clear="landlordSignature">Cancella</button>
+        </div>
+        <canvas id="landlordSignature" class="signature-pad" width="900" height="270"></canvas>
+        <small>Firmare con il dito all'interno del riquadro.</small>
+      </div>
+
+      <label class="check-row">
+        <input type="checkbox" id="confirmCash" required />
+        <span>Confermo che il pagamento in contanti è stato ricevuto.</span>
+      </label>
+
+      <button type="submit" class="primary-button">Registra e crea ricevuta</button>
+    </form>
+  </dialog>
+
+  <dialog id="receiptDialog" class="sheet-dialog">
+    <section class="sheet receipt-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div>
+          <div class="eyebrow">Ricevuta</div>
+          <h2 id="receiptDialogTitle">Pagamento registrato</h2>
+        </div>
+        <button class="icon-button" id="closeReceiptBtn" aria-label="Chiudi">✕</button>
+      </div>
+      <div id="receiptSummary" class="receipt-summary"></div>
+      <button class="primary-button" id="shareReceiptBtn">Condividi / salva PDF</button>
+      <button class="secondary-button" id="downloadReceiptBtn">Scarica PDF</button>
+      <button class="danger-button hidden" id="deletePaymentBtn">Elimina pagamento</button>
+      <p class="help-text">Su iPhone/Android usa “Condividi / salva PDF” e scegli OneDrive o Dropbox dal menu di sistema.</p>
+    </section>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
